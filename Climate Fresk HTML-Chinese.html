@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>气候拼图 Climate Fresk Online｜中文</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+  .board{touch-action:none;background:#f8fafc;background-image:radial-gradient(#cbd5e1 1px,transparent 1px);background-size:30px 30px;position:relative;overflow:hidden;}
+  .card{user-select:none;width:160px;padding:12px;background:white;border-radius:10px;box-shadow:0 2px 8px #0002;border:1px solid #ddd;}
+  .card.canvas-card{position:absolute;z-index:10;cursor:grab;}
+  .card.canvas-card:active{cursor:grabbing;}
+  .card.canvas-card.selected{outline:2px solid #10b981;outline-offset:2px;}
+  .card.lib-card{cursor:pointer;margin-bottom:8px;}
+  .context-menu{position:absolute;background:white;border-radius:8px;box-shadow:0 4px 12px #0002;z-index:1000;padding:4px 0;min-width:160px;display:none;}
+  .context-menu button{display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;cursor:pointer;font-size:14px;}
+  .context-menu button:hover{background:#f1f5f9;}
+  svg#arrowLayer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:20;}
+</style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col">
+<header class="bg-emerald-700 text-white px-4 py-3 flex justify-between items-center">
+  <h1 class="font-bold text-lg">🌍 气候拼图 Climate Fresk Online（中文）</h1>
+  <button id="showQR" class="bg-white text-emerald-700 px-3 py-1 rounded-lg text-sm">显示分享二维码</button>
+</header>
+
+<div class="flex flex-1 overflow-hidden">
+  <aside class="w-60 bg-slate-100 p-3 overflow-y-auto shrink-0">
+    <h3 class="font-semibold mb-3 text-slate-700">词卡库 Card Library</h3>
+    <div id="cardPool" class="space-y-2">
+      <!-- 中文词卡列表 -->
+    </div>
+  </aside>
+
+  <main id="board" class="board flex-1 relative">
+    <svg id="arrowLayer"></svg>
+    <div class="context-menu" id="contextMenu">
+      <button id="sendBackBtn">🔄 放回词卡库</button>
+      <button id="linkArrowBtn">➡️ 绘制箭头连接另一张卡片</button>
+    </div>
+  </main>
+</div>
+
+<div id="qrModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-2xl">
+    <h2 class="font-bold mb-3 text-center">扫码加入本次工作坊</h2>
+    <div id="qrcode"></div>
+    <p class="text-sm mt-3 text-gray-500 break-all" id="shareUrl"></p>
+    <button id="closeModal" class="mt-4 w-full py-2 bg-emerald-600 text-white rounded">关闭</button>
+  </div>
+</div>
+
+<script>
+const board = document.getElementById('board');
+const cardPool = document.getElementById('cardPool');
+const contextMenu = document.getElementById('contextMenu');
+const sendBackBtn = document.getElementById('sendBackBtn');
+const linkArrowBtn = document.getElementById('linkArrowBtn');
+const arrowLayer = document.getElementById('arrowLayer');
+
+let selectedCard = null;
+let linkingMode = false;
+let linkStartCard = null;
+const connections = [];
+
+// 中文全部词卡文本
+const cnCardTexts = [
+  "人类活动",
+  "化石燃料的使用",
+  "二氧化碳排放",
+  "额外的温室效应",
+  "气温升高",
+  "海平面上升",
+  "工业",
+  "建筑物使用",
+  "交通业",
+  "毁林",
+  "农业",
+  "其他温室气体的排放",
+  "自然碳汇",
+  "海洋酸化",
+  "冰川融化",
+  "海水温度升高",
+  "水循环失衡",
+  "陆地生物多样性",
+  "河水泛滥",
+  "海洋生物多样性",
+  "气旋",
+  "干旱",
+  "海水倒灌",
+  "淡水资源",
+  "农作物产量下降",
+  "热浪",
+  "饥荒",
+  "人类健康",
+  "人口迁移",
+  "武装冲突",
+  "永冻层"
+];
+
+// 生成左侧词卡库
+cnCardTexts.forEach((text, idx)=>{
+  const div = document.createElement('div');
+  div.className = "card lib-card";
+  div.dataset.cardId = idx+1;
+  div.innerText = text;
+  div.addEventListener('mousedown', e=>{
+    e.preventDefault();
+    const cloneDiv = document.createElement('div');
+    cloneDiv.classList.add('card','canvas-card');
+    cloneDiv.dataset.cardId = idx+1;
+    cloneDiv.innerText = text;
+    cloneDiv.dataset.x = 80;
+    cloneDiv.dataset.y = 80;
+    cloneDiv.style.transform = `translate(80px,80px)`;
+    board.appendChild(cloneDiv);
+    bindCanvasDrag(cloneDiv);
+    bindCanvasClick(cloneDiv);
+  })
+  cardPool.appendChild(div);
+})
+
+function bindCanvasDrag(el){
+  interact(el).draggable({
+    inertia:true,
+    modifiers:[interact.modifiers.restrictRect({restrict:'#board'})],
+    listeners:{
+      move(e){
+        const cx=(parseFloat(el.dataset.x||0))+e.dx;
+        const cy=(parseFloat(el.dataset.y||0))+e.dy;
+        el.style.transform=`translate(${cx}px,${cy}px)`;
+        el.dataset.x=cx;el.dataset.y=cy;
+        redrawArrows();
+      }
+    }
+  })
+}
+
+function bindCanvasClick(el){
+  el.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    if(linkingMode){
+      createArrow(linkStartCard, el);
+      linkingMode = false;
+      linkStartCard = null;
+      contextMenu.style.display = 'none';
+      return;
+    }
+    document.querySelectorAll('.canvas-card.selected').forEach(c=>c.classList.remove('selected'));
+    selectedCard = el;
+    el.classList.add('selected');
+    const boardRect = board.getBoundingClientRect();
+    contextMenu.style.left = (e.clientX - boardRect.left)+'px';
+    contextMenu.style.top = (e.clientY - boardRect.top)+'px';
+    contextMenu.style.display = 'block';
+  })
+}
+
+sendBackBtn.onclick = ()=>{
+  if(selectedCard){
+    const cardToRemove = selectedCard;
+    for(let i = connections.length - 1; i >= 0; i--){
+      const c = connections[i];
+      if(c.from === cardToRemove || c.to === cardToRemove){
+        connections.splice(i,1);
+      }
+    }
+    cardToRemove.remove();
+    contextMenu.style.display = 'none';
+    selectedCard = null;
+    redrawArrows();
+  }
+}
+
+linkArrowBtn.onclick = ()=>{
+  linkingMode = true;
+  linkStartCard = selectedCard;
+  contextMenu.style.display = 'none';
+}
+
+board.addEventListener('click',(e)=>{
+  if(e.target === board || e.target.tagName === 'svg'){
+    contextMenu.style.display = 'none';
+    document.querySelectorAll('.canvas-card.selected').forEach(c=>c.classList.remove('selected'));
+    selectedCard = null;
+    linkingMode = false;
+    linkStartCard = null;
+  }
+})
+
+function createArrow(fromCard, toCard){
+  connections.push({from:fromCard, to:toCard});
+  redrawArrows();
+}
+
+// 计算卡片边缘交点，箭头不钻进卡片内部
+function getEdgePoint(card, targetCard){
+  const boardRect = board.getBoundingClientRect();
+  const r1 = card.getBoundingClientRect();
+  const r2 = targetCard.getBoundingClientRect();
+  const rect = {
+    x: r1.left - boardRect.left,
+    y: r1.top - boardRect.top,
+    w: r1.width,
+    h: r1.height
+  };
+  const tc = {
+    x: (r2.left - boardRect.left)+r2.width/2,
+    y: (r2.top - boardRect.top)+r2.height/2
+  };
+  const centerX = rect.x + rect.w/2;
+  const centerY = rect.y + rect.h/2;
+  const dx = tc.x - centerX;
+  const dy = tc.y - centerY;
+
+  let t = 10000;
+  if(dx < 0) t = Math.min(t, (rect.x - centerX)/dx);
+  if(dx > 0) t = Math.min(t, (rect.x + rect.w - centerX)/dx);
+  if(dy < 0) t = Math.min(t, (rect.y - centerY)/dy);
+  if(dy > 0) t = Math.min(t, (rect.y + rect.h - centerY)/dy);
+
+  return {
+    x: centerX + dx * t,
+    y: centerY + dy * t
+  }
+}
+
+function redrawArrows(){
+  arrowLayer.innerHTML = `
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#334155"/>
+      </marker>
+    </defs>
+  `;
+  connections.forEach(conn=>{
+    const p1 = getEdgePoint(conn.from, conn.to);
+    const p2 = getEdgePoint(conn.to, conn.from);
+    const line = document.createElementNS("http://www.w3.org/2000/svg",'line');
+    line.setAttribute('x1',p1.x);
+    line.setAttribute('y1',p1.y);
+    line.setAttribute('x2',p2.x);
+    line.setAttribute('y2',p2.y);
+    line.setAttribute('stroke','#334155');
+    line.setAttribute('stroke-width','2');
+    line.setAttribute('marker-end','url(#arrowhead)');
+    arrowLayer.appendChild(line);
+  })
+}
+
+// 二维码
+const currentUrl=window.location.href;
+document.getElementById("shareUrl").innerText=currentUrl;
+new QRCode(document.getElementById("qrcode"),{
+  text:currentUrl,width:220,height:220,correctLevel:QRCode.CorrectLevel.H
+})
+const modal=document.getElementById("qrModal");
+document.getElementById("showQR").onclick=()=>modal.classList.replace("hidden","flex");
+document.getElementById("closeModal").onclick=()=>modal.classList.replace("flex","hidden");
+</script>
+</body>
+</html>
