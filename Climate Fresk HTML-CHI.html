@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<title>Climate Fresk Online</title>
+<title>气候拼图 Climate Fresk Online｜iPad双指缩放</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <style>
@@ -16,7 +16,7 @@
 }
 body{
   margin:0;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
 }
 .app{
   display:flex;
@@ -112,7 +112,7 @@ button{
   border-radius:10px;
   box-shadow:0 2px 6px rgba(0,0,0,.08);
   padding:8px;
-  font-size:11px;
+  font-size:12px;
   line-height:1.35;
   color:#111827;
   box-sizing:border-box;
@@ -170,7 +170,7 @@ button{
   align-items:center;
   justify-content:center;
   text-align:center;
-  font-size:calc(11px * var(--zoom,0.7));
+  font-size:calc(12px * var(--zoom,0.7));
 }
 .slot-card.selected{
   outline:2px solid #10b981;
@@ -192,7 +192,7 @@ svg#arrowLayer{
   box-shadow:0 4px 12px rgba(0,0,0,.12);
   z-index:100;
   padding:6px 0;
-  min-width:190px;
+  min-width:170px;
   display:none;
 }
 .context-menu button{
@@ -232,7 +232,6 @@ svg#arrowLayer{
   align-items:center;
   justify-content:center;
   text-align:center;
-  font-size:11px;
 }
 .mobile-bar{
   display:none;
@@ -292,6 +291,7 @@ svg#arrowLayer{
   min-width:44px;
   text-align:center;
 }
+/* 规则弹窗 */
 .modal-mask{
   position:fixed;
   inset:0;
@@ -344,21 +344,21 @@ svg#arrowLayer{
 <div class="app">
   <header>
     <div>
-      <h1>🌍 Climate Fresk</h1>
+      <h1>🌍 气候拼图</h1>
     </div>
     <div class="header-buttons">
-      <button class="btn-info" id="openRuleBtn">Rules</button>
-      <button class="btn-success" id="showAnswerBtn">Show standard answer</button>
-      <button class="btn-warning" id="undoAnswerBtn">Undo standard answer</button>
-      <button class="btn-primary" id="checkArrowBtn">Check my arrows</button>
-      <button class="btn-danger" id="clearAllBtn">Return all cards</button>
-      <button class="btn-reset" id="fullResetBtn">Reset whole canvas</button>
+      <button class="btn-info" id="openRuleBtn">游戏规则</button>
+      <button class="btn-success" id="showAnswerBtn">显示标准答案</button>
+      <button class="btn-warning" id="undoAnswerBtn">撤销标准答案</button>
+      <button class="btn-primary" id="checkArrowBtn">校验我的箭头</button>
+      <button class="btn-danger" id="clearAllBtn">全部归还</button>
+      <button class="btn-reset" id="fullResetBtn">重置整个画布</button>
     </div>
   </header>
 
   <div class="main-area">
     <aside class="library">
-      <h3>Card library</h3>
+      <h3>词卡库</h3>
       <div id="cardPool"></div>
     </aside>
 
@@ -369,105 +369,105 @@ svg#arrowLayer{
       </div>
 
       <div class="zoom-panel">
-        <button class="btn-zoom" id="zoomOutBtn">− Zoom out</button>
+        <button class="btn-zoom" id="zoomOutBtn">缩小 −</button>
         <span id="zoomLevel">70%</span>
-        <button class="btn-zoom" id="zoomInBtn">Zoom in +</button>
-        <button class="btn-primary" id="zoomResetBtn">Reset view</button>
+        <button class="btn-zoom" id="zoomInBtn">放大 +</button>
+        <button class="btn-primary" id="zoomResetBtn">重置视图</button>
       </div>
     </div>
   </div>
 
   <div class="mobile-bar">
-    <button class="btn-info" id="mobileOpenRuleBtn">Rules</button>
-    <button class="btn-primary" id="openDrawerBtn">Open card library</button>
-    <button class="btn-success" id="mobileShowAnswer">Show answer</button>
-    <button class="btn-warning" id="mobileUndoAnswer">Undo answer</button>
-    <button class="btn-primary" id="mobileCheckArrow">Check arrows</button>
-    <button class="btn-danger" id="mobileClearBtn">Return all</button>
-    <button class="btn-reset" id="mobileFullResetBtn">Reset canvas</button>
+    <button class="btn-info" id="mobileOpenRuleBtn">游戏规则</button>
+    <button class="btn-primary" id="openDrawerBtn">打开词卡库</button>
+    <button class="btn-success" id="mobileShowAnswer">显示标准答案</button>
+    <button class="btn-warning" id="mobileUndoAnswer">撤销标准答案</button>
+    <button class="btn-primary" id="mobileCheckArrow">校验箭头</button>
+    <button class="btn-danger" id="mobileClearBtn">全部归还</button>
+    <button class="btn-reset" id="mobileFullResetBtn">重置画布</button>
   </div>
 </div>
 
-<div class="link-tip" id="linkTip">👉 Click another occupied slot to finish connection</div>
+<div class="link-tip" id="linkTip">👉 点击另一个已有卡片的槽位完成连线</div>
 
 <div class="drawer-mask" id="drawerMask"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-header">
-    <h3>Card library</h3>
-    <button id="closeDrawerBtn">Close</button>
+    <h3>词卡库</h3>
+    <button id="closeDrawerBtn">关闭</button>
   </div>
   <div id="mobileCardPool"></div>
 </div>
 
 <div class="context-menu" id="contextMenu">
-  <button id="returnBtn">Return to card library</button>
-  <button id="linkBtn">Connect to another card slot</button>
+  <button id="returnBtn">归还至词卡库</button>
+  <button id="linkBtn">连接到另一个卡片槽位</button>
 </div>
 
+<!-- 游戏规则弹窗 -->
 <div class="modal-mask" id="ruleModalMask">
   <div class="modal-wrap">
-    <h2>🌍 Climate Fresk Online — Instructions</h2>
-    <p><strong>Game purpose:</strong> To raise people’s awareness of Earth’s climate changes and emphasize sustainable development through causal‑effect chains. This is the online simulation of Climate Fresk. Place all cards onto canvas slots and draw causal arrows to reconstruct the full chain of climate change. The page resets to blank canvas automatically on opening.</p>
+    <h2>🌍 气候拼图 Climate Fresk 线上版 使用说明</h2>
+    <p><strong>游戏目的：</strong>让更多人意识到地球气候上的变化，通过因果关系链重视可持续发展。本页面为《气候拼图》线上模拟工具，将全部词卡摆放到画布槽位，画出因果箭头，梳理气候变化完整因果链条。<br>页面打开会自动重置为空白画布。</p>
 
-    <p><strong>📐 Layout</strong></p>
-    <p>• Desktop: Left‑side <strong>Card library</strong> stores all cards; central area is the drawing canvas.</p>
-    <p>• Phone / iPad: Tap <strong>Open card library</strong> to bring cards up from bottom drawer.</p>
-    <p>• Dashed boxes on canvas: slots for placing cards.</p>
-    <p>• iPad supports <strong>pinch‑to‑zoom</strong> on canvas; single‑finger drag to pan. Zoom buttons are also at top‑right corner.</p>
+    <p><strong>📐布局说明</strong></p>
+    <p>• 电脑：左侧【词卡库】存放全部卡片，中间大区域为拼图白板画布；</p>
+    <p>• 手机 / iPad：点击底部【打开词卡库】按钮，从底部抽屉取出词卡；</p>
+    <p>• 画布虚线方框：槽位，用来放置词卡；</p>
+    <p>• iPad支持<strong>双指捏合缩放画布</strong>，单指滑动平移画布；右上角也有缩放按钮。</p>
 
-    <p><strong>🎮 How to play</strong></p>
-    <p>1. Drag cards from card library and drop them into dashed slots.</p>
-    <p>2. <strong>Tap a placed card</strong> to open context menu:</p>
-    <p> ‑ Return to card library: send this card back to library.</p>
-    <p> ‑ Connect to another card slot: start drawing arrow, then tap target card to complete link.</p>
+    <p><strong>🎮操作方式</strong></p>
+    <p>1. 从词卡库拖拽卡片，放到画布虚线槽位；</p>
+    <p>2. <strong>点击已经放好的卡片</strong>，弹出菜单：</p>
+    <p> ▪ 归还至词卡库：把卡片放回词卡库；</p>
+    <p> ▪ 连接到另一个卡片槽位：开始画箭头，再点击另一张卡片完成连线。</p>
 
-    <p><strong>🔘 Button reference</strong></p>
-    <p>• <strong>Rules</strong>: Open this help panel.</p>
-    <p>• <strong>Show standard answer</strong>: draw standard causal arrows only, your card positions stay unchanged. Editing is disabled while answer is shown.</p>
-    <p>• <strong>Undo standard answer</strong>: remove standard arrows and restore your own connections.</p>
-    <p>• <strong>Check my arrows</strong>: validate your drawn arrows. 🟢 Green = matches expected causal link; ⚫ Black = wrong or extra connection.</p>
-    <p>• <strong>Return all cards</strong>: move all cards back to library, slots remain empty.</p>
-    <p>• <strong>Reset whole canvas</strong>: fully reset everything to initial blank state.</p>
-    <p>• <strong>Open card library</strong> (mobile): pop‑up bottom drawer with cards.</p>
-    <p>• Zoom out / Zoom in / Reset view: adjust canvas scale; will NOT modify cards or connections.</p>
+    <p><strong>🔘各个按钮功能</strong></p>
+    <p>• <strong>游戏规则</strong>：打开本帮助说明；</p>
+    <p>• <strong>显示标准答案</strong>：只画出标准因果箭头，不会改动你的卡片摆放。展示答案期间不能操作拼图；</p>
+    <p>• <strong>撤销标准答案</strong>：移除标准箭头，恢复你自己画的连线；</p>
+    <p>• <strong>校验我的箭头</strong>：检查你画的箭头。🟢绿色箭头=因果关系匹配标准答案；⚫黑色箭头=错误/多余；</p>
+    <p>• <strong>全部归还</strong>：画布上所有卡片全部退回词卡库，保留空白槽位；</p>
+    <p>• <strong>重置整个画布</strong>：清空画布，恢复到刚打开页面的初始状态；</p>
+    <p>• <strong>打开词卡库</strong>(移动端)：弹出底部抽屉查看、拖拽词卡；</p>
+    <p>• 缩小‑ / 放大+ / 重置视图：控制画布缩放，不会改动卡片与连线数据。</p>
 
-    <p><strong>💡 Tip</strong></p>
-    <p>Refreshing browser clears all work. Data stays in your local browser only, nothing is uploaded to server.</p>
+    <p><strong>💡小提示</strong></p>
+    <p>刷新浏览器页面会自动清空所有拼图内容；数据仅保存在本地浏览器，不会上传服务器。</p>
 
     <div class="modal-close-row">
-      <button class="btn-primary" id="closeRuleBtn">Close</button>
+      <button class="btn-primary" id="closeRuleBtn">关闭</button>
     </div>
   </div>
 </div>
 
 <script>
-// Official Climate Fresk English card texts
-const enCardTexts = [
-  "Human activities","Fossil fuel use","CO₂ emissions","Additional greenhouse effect","Rising temperatures",
-  "Sea‑level rise","Industry","Building use","Transport","Deforestation",
-  "Agriculture","Other GHG emissions","Natural carbon sinks","Ocean acidification","Glacier melt",
-  "Ocean warming","Water cycle disruption","Terrestrial biodiversity","River floods","Marine biodiversity",
-  "Cyclones","Droughts","Saltwater intrusion","Freshwater resources","Crop yield decline",
-  "Heatwaves","Famine","Human health","Human migration","Armed conflicts","Permafrost"
+const cnCardTexts = [
+  "人类活动","化石燃料的使用","二氧化碳排放","额外的温室效应","气温升高",
+  "海平面上升","工业","建筑物使用","交通业","毁林",
+  "农业","其他温室气体的排放","自然碳汇","海洋酸化","冰川融化",
+  "海水温度升高","水循环失衡","陆地生物多样性","河水泛滥","海洋生物多样性",
+  "气旋","干旱","海水倒灌","淡水资源","农作物产量下降",
+  "热浪","饥荒","人类健康","人口迁移","武装冲突","永冻层"
 ];
 const nameToId = {};
-enCardTexts.forEach((name,idx)=>nameToId[name]=idx);
+cnCardTexts.forEach((name,idx)=>nameToId[name]=idx);
 
 const standardRelationsText = [
-  ["Human activities","Industry"],["Human activities","Building use"],["Human activities","Transport"],["Human activities","Agriculture"],
-  ["Industry","Fossil fuel use"],["Building use","Fossil fuel use"],["Transport","Fossil fuel use"],
-  ["Fossil fuel use","CO₂ emissions"],["Deforestation","CO₂ emissions"],["CO₂ emissions","Natural carbon sinks"],
-  ["Agriculture","Deforestation"],["Other GHG emissions","Additional greenhouse effect"],["Natural carbon sinks","Additional greenhouse effect"],["Natural carbon sinks","Ocean acidification"],
-  ["Additional greenhouse effect","Rising temperatures"],["Glacier melt","Sea‑level rise"],["Glacier melt","Freshwater resources"],
-  ["Ocean warming","Sea‑level rise"],["Ocean warming","Marine biodiversity"],["Ocean warming","Cyclones"],
-  ["Water cycle disruption","Terrestrial biodiversity"],["Water cycle disruption","River floods"],["Water cycle disruption","Droughts"],
-  ["Rising temperatures","Water cycle disruption"],["Rising temperatures","Terrestrial biodiversity"],["Rising temperatures","Heatwaves"],["Rising temperatures","Permafrost"],["Rising temperatures","Glacier melt"],["Rising temperatures","Ocean warming"],
-  ["Sea‑level rise","Saltwater intrusion"],["Ocean acidification","Marine biodiversity"],["Terrestrial biodiversity","Crop yield decline"],
-  ["River floods","Freshwater resources"],["River floods","Crop yield decline"],["Marine biodiversity","Famine"],
-  ["Droughts","Crop yield decline"],["Freshwater resources","Crop yield decline"],["Crop yield decline","Famine"],
-  ["Saltwater intrusion","Human migration"],["Cyclones","Saltwater intrusion"],["Heatwaves","Human health"],
-  ["Famine","Human health"],["Famine","Human migration"],["Human health","Famine"],["Human health","Armed conflicts"],
-  ["Human migration","Armed conflicts"],["Human migration","Famine"],["Armed conflicts","Human migration"],["Armed conflicts","Human health"],["Permafrost","Other GHG emissions"]
+  ["人类活动","工业"],["人类活动","建筑物使用"],["人类活动","交通业"],["人类活动","农业"],
+  ["工业","化石燃料的使用"],["建筑物使用","化石燃料的使用"],["交通业","化石燃料的使用"],
+  ["化石燃料的使用","二氧化碳排放"],["毁林","二氧化碳排放"],["二氧化碳排放","自然碳汇"],
+  ["农业","毁林"],["其他温室气体的排放","额外的温室效应"],["自然碳汇","额外的温室效应"],["自然碳汇","海洋酸化"],
+  ["额外的温室效应","气温升高"],["冰川融化","海平面上升"],["冰川融化","淡水资源"],
+  ["海水温度升高","海平面上升"],["海水温度升高","海洋生物多样性"],["海水温度升高","气旋"],
+  ["水循环失衡","陆地生物多样性"],["水循环失衡","河水泛滥"],["水循环失衡","干旱"],
+  ["气温升高","水循环失衡"],["气温升高","陆地生物多样性"],["气温升高","热浪"],["气温升高","永冻层"],["气温升高","冰川融化"],["气温升高","海水温度升高"],
+  ["海平面上升","海水倒灌"],["海洋酸化","海洋生物多样性"],["陆地生物多样性","农作物产量下降"],
+  ["河水泛滥","淡水资源"],["河水泛滥","农作物产量下降"],["海洋生物多样性","饥荒"],
+  ["干旱","农作物产量下降"],["淡水资源","农作物产量下降"],["农作物产量下降","饥荒"],
+  ["海水倒灌","人口迁移"],["气旋","海水倒灌"],["热浪","人类健康"],
+  ["饥荒","人类健康"],["饥荒","人口迁移"],["人类健康","饥荒"],["人类健康","武装冲突"],
+  ["人口迁移","武装冲突"],["人口迁移","饥荒"],["武装冲突","人口迁移"],["武装冲突","人类健康"],["永冻层","其他温室气体的排放"]
 ];
 const standardRelations = standardRelationsText.map(([a,b])=>[nameToId[a],nameToId[b]]);
 
@@ -513,7 +513,7 @@ let slotList = getDefaultSlotList();
 const connections = [];
 let availableCardIds = new Set();
 function resetAvailableAll(){
-  availableCardIds = new Set(enCardTexts.map((_,i)=>i));
+  availableCardIds = new Set(cnCardTexts.map((_,i)=>i));
 }
 function syncAvailableBySlots(){
   resetAvailableAll();
@@ -618,7 +618,7 @@ function renderSlots(){
     if(slot.cardId!==null){
       const card = document.createElement("div");
       card.className = "slot-card";
-      card.textContent = enCardTexts[slot.cardId];
+      card.textContent = cnCardTexts[slot.cardId];
       card.dataset.slotIdx = idx;
       div.appendChild(card);
     }
@@ -631,7 +631,7 @@ function renderCardPool(){
   cardPool.innerHTML = "";
   mobileCardPool.innerHTML = "";
   availableCardIds.forEach(id=>{
-    const txt = enCardTexts[id];
+    const txt = cnCardTexts[id];
     const c1 = document.createElement("div");
     c1.className = "card lib-card";
     c1.textContent = txt;
@@ -851,18 +851,18 @@ function showStandardAnswer(){
     }
   })
   isShowingAnswer=true; redrawArrows();
-  alert("✅ Standard‑answer arrows displayed.\nClick [Undo standard answer] to restore your own arrows.\n⚠️ While showing answer you cannot drag cards, draw connections or return cards.");
+  alert("✅已展示标准答案箭头；点击【撤销标准答案】恢复你自己画的箭头。\n⚠️展示答案期间无法拖拽、画箭头、归还卡片。");
 }
 function undoStandardAnswer(){
-  if(!isShowingAnswer){ alert("No standard answer is currently displayed, no need to undo."); return; }
+  if(!isShowingAnswer){ alert("当前没有展示标准答案，无需撤销"); return; }
   connections.length=0;
   connections.push(...JSON.parse(JSON.stringify(snapshotUserConnections)));
   isShowingAnswer=false; snapshotUserConnections=[];
   redrawArrows();
-  alert("✅ Undone. Back to your own canvas, you may continue editing.");
+  alert("✅已撤销标准答案，回到你自己的画布，可以继续操作。");
 }
 function checkUserArrows(){
-  if(isShowingAnswer){ alert("⚠️ Please click [Undo standard answer] first and return to your canvas before checking arrows."); return; }
+  if(isShowingAnswer){ alert("⚠️请先点击【撤销标准答案】回到自己的画布，再执行箭头校验！"); return; }
   const slotToCardId = new Map();
   slotList.forEach((slot,slotIdx)=>{ if(slot.cardId!==null) slotToCardId.set(slotIdx,slot.cardId); });
   const standardKeySet = new Set();
@@ -883,7 +883,7 @@ function checkUserArrows(){
     }
   })
   redrawArrows(colorMap);
-  alert("✅ Check complete!\n🟢 Green arrow = fully correct causal link.\n⚫ Black arrow = extra / wrong direction / missing card on slot.\nYou can modify your canvas and re‑check any time.");
+  alert("✅校验完成！\n🟢绿色箭头 = 因果关系完全正确；\n⚫黑色箭头 = 多余、方向错误、或者源/目标槽没有放置卡片。\n你可以继续修改画布，再次点击按钮可以重新校验。");
 }
 
 function saveData(){
@@ -891,6 +891,7 @@ function saveData(){
   localStorage.setItem("cf-answer-check", JSON.stringify(payload));
 }
 
+//弹窗控制
 function openRuleModal(){
   if(ruleModalMask) ruleModalMask.style.display="block";
 }
